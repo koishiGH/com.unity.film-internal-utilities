@@ -10,18 +10,25 @@ using UnityEditor;
 namespace Unity.FilmInternalUtilities {
 internal static class ObjectUtility {
 
-    internal static IEnumerable<T> FindSceneComponents<T>(bool includeInactive = true) where T: UnityEngine.Component {
+    internal static IEnumerable<T> FindSceneComponents<T>(bool includeInactive = true) where T : UnityEngine.Component {
         T[] objs = FindSceneComponentsAsArray<T>(includeInactive);
         int numObjects = objs.Length;
-        for (int i=0;i<numObjects;++i) {
+        for (int i = 0; i < numObjects; ++i) {
             yield return objs[i];
         }
     }
 
-    internal static T[] FindSceneComponentsAsArray<T>(bool includeInactive = true) where T: UnityEngine.Component {
-        FindObjectsInactive findObjectsInactive = includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
-        T[] objs = Object.FindObjectsByType<T>(findObjectsInactive, FindObjectsSortMode.None);
-        return objs;
+    internal static T[] FindSceneComponentsAsArray<T>(bool includeInactive = true) where T : UnityEngine.Component {
+        T[] objs = Object.FindObjectsOfType<T>();
+        if (includeInactive)
+            return objs;
+
+        List<T> activeObjs = new List<T>();
+        foreach (var obj in objs) {
+            if (obj.gameObject.activeInHierarchy)
+                activeObjs.Add(obj);
+        }
+        return activeObjs.ToArray();
     }
     
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------       
